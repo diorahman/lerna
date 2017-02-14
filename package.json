@@ -1,6 +1,6 @@
 {
-  "name": "lerna",
-  "version": "2.0.0-beta.35",
+  "name": "uler",
+  "version": "1.0.1",
   "description": "Tool for managing JavaScript projects with multiple packages",
   "main": "lib/index.js",
   "scripts": {
@@ -47,7 +47,7 @@
     "sync-exec": "^0.6.2"
   },
   "bin": {
-    "lerna": "./bin/lerna.js"
+    "uler": "./bin/lerna.js"
   },
   "devDependencies": {
     "babel-cli": "^6.7.5",
