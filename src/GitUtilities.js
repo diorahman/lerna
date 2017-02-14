@@ -99,4 +99,51 @@ export default class GitUtilities {
       return false;
     }
   }
+
+  @logger.logifySync()
+  static hasTag({name, version}) {
+    const tagName = name + "@" + version;
+    const tags = ChildProcessUtilities.execSync("git tag");
+    return tags.split('\n').filter(tag => tag === tagName).length > 0;
+  }
+
+  @logger.logifySync()
+  static hasBranch({name, version}) {
+    const branchName = name + "-" + version;
+    const branches = ChildProcessUtilities.execSync("git branch");
+    return branches.split('\n').filter(branch => branch === branchName).length > 0;
+  }
+
+  @logger.logifySync()
+  static removeBranch({name, version}) {
+    // FIXME: remote
+    const branchName = name + "-" + version;
+    return ChildProcessUtilities.execSync("git branch -D " + branchName);
+  }
+
+  @logger.logifySync()
+  static removeTag({name, version}) {
+    // FIXME: remote
+    const tagName = name + "@" + version;
+    return ChildProcessUtilities.execSync("git tag -d " + tagName);
+  }
+
+  @logger.logifySync()
+  static makeRelease({name, version}, remote = "origin") {
+    // FIXME check if remote exists
+    const releaseBranch = name + "-" + version;
+    const releaseTag = name + "@" + version;
+    ChildProcessUtilities.execSync("git checkout master")
+    ChildProcessUtilities.execSync("rm -fr /tmp/" + name);
+    ChildProcessUtilities.execSync("mv packages/" + name + " /tmp/");
+    ChildProcessUtilities.execSync("git checkout --orphan " + releaseBranch);
+    ChildProcessUtilities.execSync("git rm -rf .");
+    ChildProcessUtilities.execSync("cp -r /tmp/" + name + "/* .");
+    ChildProcessUtilities.execSync("git add .");
+    ChildProcessUtilities.execSync("git commit -a -m " + releaseBranch);
+    ChildProcessUtilities.execSync("git tag -a -m " + releaseTag + " " + releaseTag);
+    ChildProcessUtilities.execSync("git push " + remote + " " + releaseBranch);
+    ChildProcessUtilities.execSync("git push " + remote + " " + releaseTag);
+    ChildProcessUtilities.execSync("git checkout master");
+  }
 }

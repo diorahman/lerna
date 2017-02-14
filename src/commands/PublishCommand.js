@@ -90,11 +90,36 @@ export default class PublishCommand extends Command {
       return;
     }
 
-    if (this.flags.skipNpm) {
-      callback(null, true);
-    } else {
-      this.publishPackagesToNpm(callback);
+    if (this.flags.github) {
+      return this.publishPackagesToGithub(callback)
     }
+
+    if (this.flags.skipNpm) {
+      return callback(null, true);
+    }
+
+    this.publishPackagesToNpm(callback);
+  }
+
+  publishPackagesToGithub(callback) {
+    this.logger.newLine()
+    this.logger.info("Publishing packages to github...");
+
+    // create an orphan branch for each packages
+    this.updates.forEach((update) => {
+      // check if branch exists
+      const branchExists = GitUtilities.hasBranch(update.package)
+      if (branchExists) {
+        GitUtilities.removeBranch(update.package)
+      }
+      const tagExists = GitUtilities.hasTag(update.package)
+      if (tagExists) {
+        GitUtilities.removeTag(update.package)
+      }
+      GitUtilities.makeRelease(update.package)
+    })
+
+    return callback(null, true)
   }
 
   publishPackagesToNpm(callback) {
